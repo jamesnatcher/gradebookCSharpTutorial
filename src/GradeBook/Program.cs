@@ -15,12 +15,19 @@ namespace GradeBook
             {
                 input = defaultBookname;
             }
-            var book = new Book(input);
-            book.GradeAdded += OnGradeAdded;
-            book.GradeAdded += OnGradeAdded;
-            book.GradeAdded += OnGradeAdded;
+            IBook book = new DiskBook(input);
+            book.GradeAdded += OnGradeAdded; // Delegate
 
 
+            EnterGrades(book);
+
+            var result = book.GetStatistics();
+
+            Statistics.ShowStatistics(result);
+        }
+
+        private static void EnterGrades(IBook book)
+        {
             while (true)
             {
                 Console.WriteLine("Enter a grade or 'q' to quit:");
@@ -44,8 +51,6 @@ namespace GradeBook
                     Console.WriteLine(ex.Message);
                 }
             }
-            book.ShowStatistics();
-
         }
 
         static void OnGradeAdded(object sender, EventArgs e)
