@@ -3,16 +3,27 @@ namespace GradeBook
     public class Book
     {
         private List<double> grades;
-        public string Name;
+        private List<char> letterGrades;
+        public string Name
+        {
+            get;
+            set;
+            // private set;         Use this when you want to allow inital setting but not further modifications.
+        }
+        readonly string category = "Science"; // Can be changed only in constructure
+        const string category2 = "Science"; // Cannot be changed at all
+        public delegate void GradeAddedDelegate(object sender, EventArgs args);
 
         public Book(string name)
         {
             grades = new List<double>();
+            letterGrades = new List<char>();
             this.Name = name;
         }
         public Book()
         {
             grades = new List<double>();
+            letterGrades = new List<char>();
             Name = "New Book";
         }
         public string GetName()
@@ -23,13 +34,49 @@ namespace GradeBook
         {
             this.Name = name;
         }
+        public void AddGrade(string letter)
+        {
+            switch (letter)
+            {
+                case "A":
+                    grades.Add(90);
+                    break;
+                case "B":
+                    grades.Add(80);
+
+                    break;
+                case "C":
+                    grades.Add(70);
+
+                    break;
+                case "D":
+                    grades.Add(60);
+                    break;
+                case "F":
+                    grades.Add(50);
+                    break;
+                default:
+                    throw new ArgumentException($"Invalid {nameof(letter)}");
+            }
+        }
         public void AddGrade(double grade)
         {
             if (grade >= 0 && grade <= 100)
             {
                 grades.Add(grade);
+                if (GradeAdded != null)
+                {
+                    GradeAdded(this, new EventArgs());
+                }
+            }
+            else
+            {
+                throw new ArgumentException($"Invalid {nameof(grade)}");
             }
         }
+
+        public event GradeAddedDelegate GradeAdded;
+
         public double GetSum()
         {
             double sum = 0;
@@ -69,9 +116,34 @@ namespace GradeBook
             }
             return lowestGrade;
         }
+        public char GetLetterGrade()
+        {
+            char letterGrade;
+
+            switch (GetAverage())
+            {
+                case var d when d >= 90.0:
+                    letterGrade = 'A';
+                    break;
+                case var d when d >= 80.0:
+                    letterGrade = 'B';
+                    break;
+                case var d when d >= 70.0:
+                    letterGrade = 'C';
+                    break;
+                case var d when d >= 60.0:
+                    letterGrade = 'D';
+                    break;
+                default:
+                    letterGrade = 'F';
+                    break;
+            }
+
+            return letterGrade;
+        }
         public void ShowStatistics()
         {
-
+            var result = GetStatistics();
             Console.WriteLine($"Information about {GetName()}:");
             Console.Write("Grades: ");
             for (int i = 0; i < grades.Count(); i++)
@@ -86,8 +158,9 @@ namespace GradeBook
                     Console.Write($"{grades[i]}, ");
                 }
             }
-            Console.WriteLine($"Sum: {GetSum():N2} Average: {GetAverage():N2}");
-            Console.WriteLine($"Highest grade: {GetHighestGrade():N2} Lowest grade: {GetLowestGrade():N2}");
+            Console.WriteLine($"Sum: {GetSum():N2} Average: {result.Average:N2}");
+            Console.WriteLine($"Highest grade: {result.Highest:N2} Lowest grade: {result.Lowest:N2}");
+            Console.WriteLine($"Letter grade: {result.Letter}");
         }
         public Statistics GetStatistics()
         {
@@ -95,6 +168,7 @@ namespace GradeBook
             statistics.Average = GetAverage();
             statistics.Highest = GetHighestGrade();
             statistics.Lowest = GetLowestGrade();
+            statistics.Letter = GetLetterGrade();
 
             return statistics;
         }

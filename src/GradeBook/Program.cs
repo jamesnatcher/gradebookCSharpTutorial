@@ -8,12 +8,49 @@ namespace GradeBook
     {
         static void Main(string[] args)
         {
-            var book = new Book("James' gradebook");
-            book.AddGrade(89.1);
-            book.AddGrade(90.5);
-            book.AddGrade(95.6);
+            var defaultBookname = "Gradebook";
+            Console.Write("Input the name you want to give the gradebook: ");
+            var input = Console.ReadLine();
+            if (input == "")
+            {
+                input = defaultBookname;
+            }
+            var book = new Book(input);
+            book.GradeAdded += OnGradeAdded;
+            book.GradeAdded += OnGradeAdded;
+            book.GradeAdded += OnGradeAdded;
 
+
+            while (true)
+            {
+                Console.WriteLine("Enter a grade or 'q' to quit:");
+                var gradeInput = Console.ReadLine();
+                if (gradeInput == "q")
+                {
+                    break;
+                }
+                try
+                {
+                    var gradeDouble = double.Parse(gradeInput);
+                    book.AddGrade(gradeDouble);
+                }
+                catch (ArgumentException ex)
+                {
+
+                    Console.WriteLine(ex.Message);
+                }
+                catch (FormatException ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+            }
             book.ShowStatistics();
+
+        }
+
+        static void OnGradeAdded(object sender, EventArgs e)
+        {
+            Console.WriteLine("Grade was added");
         }
     }
 }
